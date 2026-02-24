@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e73d8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auditoría Operativa</title>
+
+<style>
+
+/* LOGIN */
+
+.login{
+display:flex;
+height:100vh;
+justify-content:center;
+align-items:center;
+background:#f4f6f8;
+}
+
+.login-box{
+background:white;
+padding:30px;
+border-radius:8px;
+box-shadow:0 4px 12px rgba(0,0,0,0.1);
+text-align:center;
+width:340px;
+}
+
+.login select,.login input{
+padding:8px;
+width:100%;
+margin-top:10px;
+}
+
+.login button{
+margin-top:15px;
+padding:10px;
+width:100%;
+background:#1e73d8;
+color:white;
+border:none;
+border-radius:4px;
+cursor:pointer;
+}
+
+/* SISTEMA */
+
+body{font-family:Arial,sans-serif;margin:0;}
+
+.container{
+width:21.6cm;
+margin:auto;
+padding:0.6cm 0.4cm;
+background:white;
+}
+
+.titulo-principal{
+text-align:center;
+font-size:22px;
+font-weight:bold;
+margin-bottom:15px;
+padding-bottom:8px;
+border-bottom:2px solid #000;
+}
+
+.hidden{display:none;}
+
+.encabezado{
+border:1px solid #ccc;
+padding:8px;
+margin-bottom:10px;
+border-radius:6px;
+}
+
+.fila{display:flex;justify-content:space-between;margin-bottom:4px;}
+.fila div{width:48%;}
+.fila input{width:100%;padding:4px;}
+
+.card{
+background:white;
+padding:6px;
+margin-bottom:10px;
+border-radius:6px;
+border:1px solid #ddd;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:6px;
+}
+
+.box{
+border:1px solid #ddd;
+border-radius:4px;
+display:flex;
+flex-direction:column;
+}
+
+.box h4{margin:6px;font-size:14px;}
+.box input[type="file"]{margin:0 6px 6px 6px;}
+
+.mediaContainer{
+width:100%;
+height:225px;
+overflow:hidden;
+}
+
+.mediaContainer img,
+.mediaContainer video{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+
+textarea{
+min-height:55px;
+resize:vertical;
+margin:2px 6px 4px 6px;
+}
+
+.botones-final{text-align:center;margin-top:15px;}
+button{padding:8px 14px;border:none;border-radius:5px;cursor:pointer;margin:5px;}
+
+.btn-agregar{background:#1e73d8;color:white;}
+.btn-pdf{background:#c62828;color:white;}
+.btn-guardar{background:#2e7d32;color:white;}
+.btn-cargar{background:#6a1b9a;color:white;}
+
+@media print{
+@page{size:letter;margin:0.6cm;}
+button,.botones-final{display:none;}
+.card:nth-of-type(2){page-break-after:always;}
+.card:nth-of-type(n+5):nth-of-type(3n+2){page-break-after:always;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="login">
+<div class="login-box">
+<h2>Acceso al Sistema</h2>
+<select id="tipoAcceso">
+<option value="">Seleccione tipo de acceso</option>
+<option value="auditoria">Auditoría</option>
+<option value="gerencia">Gerencia de sucursal</option>
+</select>
+<input type="password" id="clave" placeholder="Ingrese contraseña">
+<button onclick="acceder()">Ingresar</button>
+</div>
+</div>
+
+<!-- SISTEMA -->
+<div id="sistema" class="hidden">
+<div class="container">
+
+<div class="titulo-principal">
+Auditoria de la Revisión de Supermercado
+</div>
+
+<div class="encabezado">
+<div class="fila">
+<div><strong>Tienda:</strong><input id="tienda"></div>
+<div><strong>Gerencia de sucursal:</strong><input id="gerencia"></div>
+</div>
+<div class="fila">
+<div><strong>Auditoría:</strong><input id="auditor"></div>
+<div><strong>Fecha:</strong><input type="date" id="fecha"></div>
+</div>
+</div>
+
+<div id="contenedorHallazgos"></div>
+
+<div class="botones-final">
+<button class="btn-agregar" id="btnAgregar" onclick="agregarHallazgo()">Agregar Hallazgo</button>
+<button class="btn-guardar" onclick="guardarArchivo()">Guardar Archivo</button>
+<button class="btn-cargar" onclick="document.getElementById('archivo').click()">Cargar Auditoría</button>
+<button class="btn-pdf" onclick="window.print()">Exportar PDF</button>
+<input type="file" id="archivo" hidden>
+</div>
+
+</div>
+</div>
+
+<script>
+
+let rol="";
+let contador=1;
+
+function acceder(){
+const tipo=document.getElementById("tipoAcceso").value;
+const clave=document.getElementById("clave").value;
+
+if(tipo==="auditoria" && clave==="Audit@2026"){
+rol="auditoria";
+iniciar();
+}
+else if(tipo==="gerencia" && clave==="123456"){
+rol="gerencia";
+iniciar();
+}
+else{
+alert("Acceso incorrecto");
+}
+}
+
+function iniciar(){
+document.getElementById("login").classList.add("hidden");
+document.getElementById("sistema").classList.remove("hidden");
+
+if(rol==="gerencia"){
+document.getElementById("btnAgregar").style.display="none";
+}
+}
+
+function agregarHallazgo(){
+
+const contenedor=document.getElementById("contenedorHallazgos");
+const card=document.createElement("div");
+card.className="card";
+
+card.innerHTML=`
+<div><strong>Área de oportunidad #${contador} | Departamento:</strong>
+<input class="area">
+</div>
+
+<div class="grid">
+
+<div class="box">
+<h4>Imagen Hallazgo</h4>
+<input type="file" class="mediaInput" accept="image/*,video/*">
+<div class="mediaContainer"></div>
+</div>
+
+<div class="box">
+<h4>Descripción</h4>
+<textarea class="descripcion"></textarea>
+<h4>Razonamiento</h4>
+<textarea class="razonamiento"></textarea>
+<h4>Plan de Acción</h4>
+<textarea class="plan"></textarea>
+</div>
+
+<div class="box">
+<h4>Imagen Corrección</h4>
+<input type="file" class="mediaInput" accept="image/*,video/*">
+<div class="mediaContainer"></div>
+</div>
+
+</div>
+`;
+
+contenedor.appendChild(card);
+
+card.querySelectorAll(".mediaInput").forEach(input=>{
+input.addEventListener("change",function(e){
+
+const file=e.target.files[0];
+if(!file) return;
+
+const reader=new FileReader();
+const container=input.nextElementSibling;
+
+reader.onload=function(){
+if(file.type.startsWith("video")){
+container.innerHTML=`<video controls><source src="${reader.result}"></video>`;
+}else{
+container.innerHTML=`<img src="${reader.result}">`;
+}
+};
+
+reader.readAsDataURL(file);
+
+});
+});
+
+contador++;
+}
+
+function guardarArchivo(){
+
+const datos={
+tienda:document.getElementById("tienda").value,
+gerencia:document.getElementById("gerencia").value,
+auditor:document.getElementById("auditor").value,
+fecha:document.getElementById("fecha").value,
+hallazgos:[]
+};
+
+document.querySelectorAll(".card").forEach(card=>{
+
+const mediaContainers = card.querySelectorAll(".mediaContainer");
+
+datos.hallazgos.push({
+departamento:card.querySelector(".area").value,
+descripcion:card.querySelector(".descripcion").value,
+razonamiento:card.querySelector(".razonamiento").value,
+plan:card.querySelector(".plan").value,
+imagenHallazgo:mediaContainers[0].innerHTML,
+imagenCorreccion:mediaContainers[1].innerHTML
+});
+
+});
+
+const blob=new Blob([JSON.stringify(datos,null,2)],{type:"application/json"});
+const url=URL.createObjectURL(blob);
+
+const a=document.createElement("a");
+a.href=url;
+a.download="Auditoria.json";
+document.body.appendChild(a);
+a.click();
+
+document.body.removeChild(a);
+URL.revokeObjectURL(url);
+
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+
+</script>
+
+</body>
+</html>
